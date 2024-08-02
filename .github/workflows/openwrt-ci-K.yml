@@ -162,6 +162,7 @@ jobs:
           cp -rf $(find ./bin/targets/ -type f) ./artifact/firmware/
           cp -rf $(find ./bin/packages/ -type f -name "*.ipk") ./artifact/package/
           cp -rf $(find ./bin/targets/ -type f -name "*.buildinfo" -o -name "*.manifest") ./artifact/buildinfo/
+          echo "FIRMWARE_DATE=$(date +"%Y%m%d_%H%M%S")" >> $GITHUB_ENV
 
       - name: Deliver buildinfo
         uses: actions/upload-artifact@v2
@@ -181,11 +182,18 @@ jobs:
           name: OpenWrt_firmware
           path: ./bin/targets/
 
-      - name: Upload release asset
+     # - name: Upload release asset
         #if: github.event == 'release'
-        uses: svenstaro/upload-release-action@v2
+       # uses: svenstaro/upload-release-action@v2
+      #  with:
+       #   repo_token: ${{ secrets.PAT_REPO }}
+        #  file: ./artifact/firmware/*
+       #   tag: ${{ github.ref }}
+         # file_glob: true
+      - name: Release Firmware
+        uses: softprops/action-gh-release@master
         with:
-          repo_token: ${{ secrets.PAT_REPO }}
-          file: ./artifact/firmware/*
-          tag: ${{ github.ref }}
-          file_glob: true
+          tag_name: ${{ env.FIRMWARE_DATE }}_${{ github.ref }}
+          files:  ./artifact/firmware/*
+          body: |
+            云编译mt7621_openwrt固件，lede源码，超频1120MHZ
